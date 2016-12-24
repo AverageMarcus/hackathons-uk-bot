@@ -30,8 +30,9 @@ function parseWebhook(res) {
     let diffUrl = res.compare + '.diff';
     let rawUrl = `https://raw.githubusercontent.com/${res.repository.full_name}/${res.head_commit.id}/README.md`;
     let hasReadmeUpdated = res.commits.some(commit => commit.modified.indexOf('README.md') >= 0);
+    let isIgnoreTweet = res.head_commit.message.toLowerCase().indexOf('NO TWEET') >= 0;
 
-    if(hasReadmeUpdated) {
+    if(hasReadmeUpdated && !isIgnoreTweet) {
       fetch(diffUrl)
         .then(res => res.text())
         .then(diff => {
