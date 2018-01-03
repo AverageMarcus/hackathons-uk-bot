@@ -15,7 +15,7 @@ const server = restify.createServer({});
 server.use(restify.bodyParser());
 
 const monthRegex = /\| \*\*(\w+)\*\* \|/;
-const hackathonRegex = /\| \[(.+)\]\((.*)\) \| (.+) \| (.+) \|/;
+const hackathonRegex = /\| \[(.+)\]\((.*)\) \| (.+) \| (.+) \| ?(.+)? \|/;
 
 function sendTweet(tweetMessage) {
   console.log('Sending tweet');
@@ -67,7 +67,17 @@ function parseWebhook(res) {
                   let url = line.match(hackathonRegex)[2];
                   let date = line.match(hackathonRegex)[3];
                   let location = line.match(hackathonRegex)[4];
-                  let message = `🆕 Hackathon added | ${title} | ${currentMonth} ${date} | ${location} | ${url}`;
+                  let twitterHandle = line.match(hackathonRegex)[5];
+                  if (twitterHandle) {
+                    title += ` (${twitterHandle})`;
+                  }
+                  let message = `🆕 Hackathon 🆕
+
+👉 ${title} 👈
+📅 ${currentMonth} ${date}
+📍 ${location}
+
+🔗 ${url}`;
                   sendTweet(message);
                 }
               }
@@ -82,6 +92,5 @@ server.post('/webhook', (req, res, next) => {
   parseWebhook(req.body);
   res.send(200);
 });
-
 
 server.listen(process.env.PORT);
